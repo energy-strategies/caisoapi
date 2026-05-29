@@ -14,7 +14,8 @@ numpy==2.3.1
 openpyxl==3.1.5
 packaging==25.0
 pandas==2.3.1
-pydantic
+pydantic==2.13.4
+pyinstaller==6.20.0
 pillow==11.3.0
 pyparsing==3.2.3
 python-dateutil==2.9.0.post0
