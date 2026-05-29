@@ -1,0 +1,38 @@
+A compilation of notes about CAISO OASIS API, specifically for Prices. 
+
+FOR QUERYING:
+url = 'http://oasis.caiso.com/oasisapi/SingleZip' ALWAYS THIS
+startdate = yyyymmdd format, no dashes
+starttime = hr:mn (00:00)
+enddate = yyyymmdd format, no dashes
+endtime = hr:mn (00:00)
+queryname = specifies the kind of report wanted. EX: 'PRC_LMP' for hourly locational marginal prices
+marketRunID = specifies the type of market (DAM or RTM, HASP), RTPD
+version = version, some report types require an updated version number Can be found in specification folders.
+
+PRICES QUERY NAME OPTIONS:
+- PRC_LMP : Locational Marginal Prices
+    DAM, 60 mins, 
+- PRC_SPTIE_LMP : Scheduling Point/Tie Combination Locational Marginal Prices 
+    DAM, 60 mins, uses a different set of nodes (an aggregated kind)
+- PRC_INTVL_LMP : Interval Locational Marginal Prices 
+    RTM, 5 mins,
+- PRC_HASP_LMP : HASP Locational Marginal Prices 
+    HASP (hour ahead), 15 mins,
+- PRC_RTPD_LMP : FMM Locational Marginal Prices 
+    RTPD (real time pre-dispatch), 15 mins
+- PRC_DS_REF : Reference Prices 
+    No market, quarterly interval, might be a different set of nodes
+- PRC_CD_INTVL_LMP : Contingency Dispatch Locational Marginal Prices 
+    RTM, 10 mins
+- PRC_CD_SPTIE_LMP: Contingency Dispatch Scheduling Point/Tie Combination Locational Marginal Prices 
+    RTM, 10 mins, uses a different set of nodes (an aggregated kind)
+    Had issues running with my testing, as I didn't have the knowledge of applicable date ranges and nodes.
+- PRC_RTM_LAP : Hourly RTM LAP Prices 
+    RTM, 60, doesn't use all the standard nodes, might be a different set
+
+
+Example Nodes (used for testing)
+standard nodes: C7-1-S1_1_N002 , 0096WD_7_N001
+
+ADOBE_LNODE01,AGNEW_6_N002,2NDST_BP_LNODELD1

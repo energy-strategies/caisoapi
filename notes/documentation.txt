@@ -1,0 +1,176 @@
+Documentation/Log for the project
+
+IMPORTANT RESOURCES:
+https://www.caiso.com/documents/oasis-interfacespecification_v5_1_1clean_fall2017release.pdf PAGE 44 on doc has URL settings
+
+
+5/20-
+Started fiddling with the API query a little bit. Dive deeper into the queryname parameter- 
+it somehow specifies the type of report. Do analysts ask for the same type of report every time? 
+If the startdatetime and enddatetime have to specify a time, I will need to make an option of a "neutral" setting somehow (if statement)
+Got a basic query structure formatted that runs.
+
+5/21- 
+Different versions- more current/updated software I think. Version 1 is fine.
+figured out how to fix the parameter ordering issue! Pushed that and possibly deleted all my old pushes, oops 
+Zoe requested that I focus on all of the pulls that are under the ENERGY category, especially all the LMPs
+I think I have a pretty solid pull set up for now. Slightly tricky with switching between nodes and groups. (later learned no one asks for all nodes)
+Finished the basic structure of my API program allowing for user input. It has issues for sure, but it isn't horrible. 
+
+5/27-
+(troubleshooting query bugs)
+Set the default query time to 07:00 because that is what the website does (likely a timezone thing).
+Figured out that the PRC_DS_REF report works fine the way I have it, with the market type parameter blank.
+Figured out that different reports require different version numbers, fixed that.
+Met with Zoe: got feedback on making code more efficient. Learned that people will never ask for all nodes- deleted that part of the code.
+also learned that people don't know what type of report they want, they know the interval-market type. Slightly different.
+Restructred my 'map' to be searched by interval and market type. (More user friendly)
+
+5/28-
+Finished the bones of the beginning to end API call: from inputting start dates to a combined file for all dates (mostly just fixed the query limit issue)
+Figured out new way to call queryname using market and interval. The only issue is that there are a couple of duplicate report types. Not sure what the difference is or if they are necessary
+
+5/30-
+As I understand, nodes are individual points that have some sort of flow/transfer of energy through them (like from a plant or to a house)
+apnodes are aggregates of a group of nodes, and SPTie nodes are ones that connect with the grid not in CAISO boundaries
+Fixed pulling reference price data. needed a slightly different set of parameters
+
+6/2-
+Added time.cleep(10) to try and avoid query limits, and it seems to have solved my issue of random chunks not pulling
+Also added a separate cleaning portion for reference prices.
+Getting lost down a rabbit hole about PRC_CD_INTL_LMP. As far as I understand, the contingency dispatch shows prices for generation needed
+last minute after a change in load demand (like when a generator falls offline). My hypothesis was that those prices would be missing
+from the regular LMP report, or that the contingency prices would be much higher. However, I can't seem to figure out any sory of correlation.
+Managed to correctly pull a mostly clean version of each type of report! Woop woop!
+
+Rules/Notes for Pulling Reports:
+- PRC_LMP 
+    pulls great!
+- PRC_SPTIE_LMP
+    pulls great! MUST use SPTIE nodes (slightly different)
+- PRC_INTVL_LMP 
+    pulls great! It's just really slow because of the large amount of data from smaller intervals
+- PRC_HASP_LMP
+    pulls great! 
+- PRC_RTPD_LMP
+    pulls great! 
+- PRC_DS_REF 
+    pulls great! has a separate cleaning code section. Leave market section blank. use reference nodes (might be the same)
+- PRC_CD_INTVL_LMP
+    pulls great! had to pass files without data
+- PRC_CD_SPTIE_LMP
+    pulls great! had to pass files without data
+- PRC_RTM_LAP (Load Aggregated Point)
+    pull great! Use the right nodes though. (RTM_LAP, might be apnodes, might be sptie, or something else)
+
+
+6/3-
+Started working on tkinter today! I figured I would start with this and then if we decide later that streamlit 
+is better I can change it.
+Got a full run through using DAM/60 and the SPTIE filter. It took most of the day. Will need to test the other 
+files and figure out how to automatically save the file.
+
+6/4-
+Zoe told me that no one uses the contingency dispatch reports, so I can delete them if I want. I might leave it 
+bc at this point there is too much to delete with that without risking deleting other important stuff
+Tested and confirmed: PRC_LMP, PRC_SPTIE_LMP, PRC_SPTIE_LMP, PRC_HASP_LMP, PRC_RTPD_LMP, PRC_DS_REF, PRC_CD_INTVL_LMP, PRC_RTM_LAP
+Issues: PRC_CD_SPTIE_LMP (techically runs, but there isn't data to pull?) 
+Fixed bugs related to SPTIE and make it so that you can run multiple reports without closing the window. hype.
+
+6/6-
+Made it possible to download multiple reports without reopening program.
+Added "status" label.
+Figured out how to use pyinstaller to send the program to people without python. Awesome!
+
+6/9-
+Updating documentation, comments, general code cleaning.
+Added reportname label.
+Switched the user input to be only market type, limited the number of available reports to pull. (per John's request)
+Now saves as an excel file, not a csv, also changed file name to include timestamp
+Filtered columns, rounded prices to 4 decimal places, split dates in to separate columns
+Pivoted the LMP_TYPE column for readability, per Zoe's request
+
+6/16-
+Working on adding the hourly average sheet. It is complicated, because each report type has a different column 
+name for price, making pivoting and such difficult.
+Tested with hourly averages for all 4 report types and got them working.
+Sent to Jason and Justin for feedback! Showing the regulatory team in the morning :0
+
+6/17-
+Got some feedback from regulatory team about expansion to other report pulls (other RTOs). Less feedback on analyis.
+Met with Zoe, got last few cleaning things, and discusses future expansion for project and internship.
+Moved LMP column to the end of the row, renamed sheet 1.
+Deleted CSV from file where GUI is stored. 
+NOTE FOR CODE: Each report type has a different column name for price, so there is a lot of conditional cleaning added.
+I am supposed to be working on backfilling null values but I can't find any nulls to fill. Even tested the one from Zoe, and couldn't find any. (PALOVRDE_5_N101)
+
+6/18-
+Finally figured out how to see rows that are missing completely (nullChecker.py). 
+Created empty rows using the full index and then backfill. 
+
+6/22-
+Addded monthly averages sheet
+Working on filling in my null values in new rows. Got everything but LMP numbers
+
+6/23-
+Finished filling the null values for missing intervals and added to GUI.
+Finished first draft of extra sheets (not including duration chart), adding compatibility for GHG columns. Had issues with
+appending info and data to sheets, so had to add 'overlay' parameter to writer lines.
+Figured out how to add the summary statistics. It is on there, but it doesn't look super pretty. I'm interested in creating some macros to make it look kind of nice.
+Updated sharepoint with version 2 (including basic analysis pages)
+(tonight: read up on load duration curves, and start mapping out how to graph)
+
+6/25-
+Dropped unimportant columns, changed sheet from days to hours below 0, fixed rounding.
+Finally figured out how to fix report name! Yay! It has taken days.
+My duration curve is not an average day value, but just the pure data.
+Spent a lot of time today making the duration curve in python, and then using openpyxl to see it in excel. It is
+a weird module. I like how it looks, except I can't get the axes to automatically display. Oh well.
+
+6/26-
+Fixed whatever I broke last night.
+Changing timezone to MST (and relabled columns appropriatley).
+Put Below 0 stuff into summary statistics and fixed those as well. 
+Started working on heatmap: there isn't a way to create a heatmap in python and put in in excel with openpyxl, but I could code a macro to do so.
+
+6/27-
+Added heatmap by adding in 12x24 df and then coloring it (openpyxl doesn't have a heatmap chart option)
+After adding heatmap to code, running into connection error (10054), which isn't a code problem, I think. Comes up with this error occasionally.
+
+6/30-
+Having more problems with 10054. It only happens sometimes, but I have no idea why. I think I might be limited from CAISO bc of 
+the high quantity of requests in the last few weeks (esp last week). It isn't because of my code (as far as I can tell)
+Met with Zoe and decided that it is easier and looks nicer to include python screenshots instead of excel charts being added.
+
+7/1-
+Added a line chart for monthly average, and a zoomed in last 5% chart (based on the duration chart). 
+Also fixed a few small formatting things. The 10054 error seems to have fixed itself, which is great. 
+Sent to Justin for final feedback, pending that I can make the video and publish.
+
+7/8-
+Working on condensing code. Deleted conditional statement for < 30 days
+Discovered that the last day isn't pulling! Got that fixed up, reuploaded to sharepoint.
+Fixed rounding and added top 5% duration curve zoom.
+Revamped githib repo setup.
+Started going through code to make it more efficient and concise (using Claude)
+
+7/9-
+Fixed spacing errors and updated format for comments.
+Added market_run_id configuration and reworked code throughout to avoid redundancies.
+
+7/10-
+Attempted to fix the monthly chart, and then I think I hit a query limit. Nothing to push yet.
+
+7/11-
+Fixed the monthly average chart to work for multiple years, and display month names for better readability.
+Readded to sharepoint.
+
+7/21-
+Installed pylint and fixed whitespaces and shortened code lines to > 100.
+
+7/23-
+Edited and published video on youtube and added to sharepoint and github.
+
+nodes 
+0096WD_7_N001,
+PALOVRDE_5_N101
